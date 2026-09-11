@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calculadora de frete</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 24px; background: #f3f5f8; color: #172338; font-family: system-ui, sans-serif; }
+        main { max-width: 480px; margin: 48px auto; padding: 28px; background: white; border-radius: 16px; }
+        h1 { margin-top: 0; }
+        label { display: block; margin-top: 20px; font-weight: 600; }
+        input, button { width: 100%; padding: 12px; font: inherit; border-radius: 6px; }
+        input { margin-top: 8px; border: 1px solid #68758a; }
+        button { margin-top: 24px; border: 0; color: white; background: #194fc4; cursor: pointer; }
+        button:disabled { opacity: .65; cursor: wait; }
+        :focus-visible { outline: 3px solid #ac6500; outline-offset: 3px; }
+        #resultado:not(:empty) { margin-top: 24px; padding: 16px; background: #e7f4ec; border-radius: 6px; }
+        #resultado.erro { background: #fff0ef; color: #a01c16; }
+        small { display: block; margin-top: 6px; }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Calcule seu frete</h1>
+    <p>Informe o valor do carrinho e o CEP para consultar a região e o frete.</p>
+    <form id="form-frete">
+        <label for="valor-carrinho">Valor do carrinho (R$)</label>
+        <input id="valor-carrinho" name="valor_carrinho" type="number" min="0.01" step="0.01" required inputmode="decimal">
+        <label for="cep">CEP de destino</label>
+        <input id="cep" name="cep" type="text" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{5}-?[0-9]{3}" maxlength="9" required aria-describedby="ajuda-cep">
+        <small id="ajuda-cep">Use 8 dígitos, com ou sem hífen: 01001-000.</small>
+        <button type="submit">Calcular frete</button>
+    </form>
+    <div id="resultado" role="status" aria-live="polite" aria-atomic="true"></div>
+</main>
+<script>
+    const formulario = document.querySelector('#form-frete');
+    const resultado = document.querySelector('#resultado');
+    const botao = formulario.querySelector('button');
+    const moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    formulario.addEventListener('submit', async (evento) => {
+        evento.preventDefault();
+        botao.disabled = true;
+        resultado.className = '';
+        resultado.textContent = 'Calculando…';
+        try {
+            const resposta = await fetch('/calcular', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    valor_carrinho: document.querySelector('#valor-carrinho').value,
+                    cep: document.querySelector('#cep').value
+                })
+            });
+            const dados = await resposta.json();
+            if (!resposta.ok) {
+                resultado.className = 'erro';
+                resultado.textContent = dados.erro || 'Não foi possível calcular o frete.';
+                return;
+            }
+            resultado.textContent = `Região: ${dados.regiao}. Frete: ${moeda.format(dados.frete)}${dados.frete === 0 ? ' (grátis)' : ''}.`;
+        } catch {
+            resultado.className = 'erro';
+            resultado.textContent = 'Não foi possível conectar ao serviço. Tente novamente.';
+        } finally {
+            botao.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
