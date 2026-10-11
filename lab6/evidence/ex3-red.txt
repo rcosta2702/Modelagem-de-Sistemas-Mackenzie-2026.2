@@ -1,0 +1,43 @@
+...FFF.................................                                  [100%]
+================================== FAILURES ===================================
+___________________ test_req01_frete_padrao_e_total[200.00] ___________________
+
+subtotal = '200.00'
+
+    @pytest.mark.parametrize("subtotal", ["0.01", "100.00", "199.99", "200.00", "200.01", "249.99"])
+    def test_req01_frete_padrao_e_total(subtotal):
+>       assert calcular_frete(subtotal) == Decimal("15.00")
+E       AssertionError: assert Decimal('0.00') == Decimal('15.00')
+E        +  where Decimal('0.00') = calcular_frete('200.00')
+E        +  and   Decimal('15.00') = Decimal('15.00')
+
+tests\test_frete.py:11: AssertionError
+___________________ test_req01_frete_padrao_e_total[200.01] ___________________
+
+subtotal = '200.01'
+
+    @pytest.mark.parametrize("subtotal", ["0.01", "100.00", "199.99", "200.00", "200.01", "249.99"])
+    def test_req01_frete_padrao_e_total(subtotal):
+>       assert calcular_frete(subtotal) == Decimal("15.00")
+E       AssertionError: assert Decimal('0.00') == Decimal('15.00')
+E        +  where Decimal('0.00') = calcular_frete('200.01')
+E        +  and   Decimal('15.00') = Decimal('15.00')
+
+tests\test_frete.py:11: AssertionError
+___________________ test_req01_frete_padrao_e_total[249.99] ___________________
+
+subtotal = '249.99'
+
+    @pytest.mark.parametrize("subtotal", ["0.01", "100.00", "199.99", "200.00", "200.01", "249.99"])
+    def test_req01_frete_padrao_e_total(subtotal):
+>       assert calcular_frete(subtotal) == Decimal("15.00")
+E       AssertionError: assert Decimal('0.00') == Decimal('15.00')
+E        +  where Decimal('0.00') = calcular_frete('249.99')
+E        +  and   Decimal('15.00') = Decimal('15.00')
+
+tests\test_frete.py:11: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_frete.py::test_req01_frete_padrao_e_total[200.00] - Asserti...
+FAILED tests/test_frete.py::test_req01_frete_padrao_e_total[200.01] - Asserti...
+FAILED tests/test_frete.py::test_req01_frete_padrao_e_total[249.99] - Asserti...
+3 failed, 36 passed in 0.15s

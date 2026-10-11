@@ -1,0 +1,33 @@
+from decimal import Decimal
+
+import pytest
+
+from frete import calcular_frete, calcular_total
+
+
+# REQ-01: taxa padrão e total abaixo do limite.
+@pytest.mark.parametrize("subtotal", ["0.01", "100.00", "199.99", "200.00", "200.01", "249.99"])
+def test_req01_frete_padrao_e_total(subtotal):
+    assert calcular_frete(subtotal) == Decimal("15.00")
+    assert calcular_total(subtotal) == Decimal(subtotal) + Decimal("15.00")
+
+
+# REQ-02: limite inclusivo e valores acima dele.
+@pytest.mark.parametrize("subtotal", ["250.00", "250.01", "1000.00"])
+def test_req02_frete_gratis_e_total(subtotal):
+    assert calcular_frete(subtotal) == Decimal("0.00")
+    assert calcular_total(subtotal) == Decimal(subtotal)
+
+
+# REQ-03: recusar valores inválidos sem divulgar o conteúdo recebido.
+@pytest.mark.parametrize("subtotal", [0, -1, True, False, None, "", "abc", "NaN", "Infinity", "-Infinity", "0.001", [], {}])
+@pytest.mark.parametrize("calculo", [calcular_frete, calcular_total])
+def test_req03_valor_invalido(subtotal, calculo):
+    with pytest.raises(ValueError, match="^Valor do carrinho inválido$"):
+        calculo(subtotal)
+
+
+@pytest.mark.parametrize("subtotal", [100, 100.0, "100.00", Decimal("100.00")])
+def test_contrato_tipos_monetarios(subtotal):
+    assert calcular_total(subtotal) == Decimal("115.00")
+    assert isinstance(calcular_total(subtotal), Decimal)
