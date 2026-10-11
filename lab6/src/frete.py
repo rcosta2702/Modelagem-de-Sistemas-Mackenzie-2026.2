@@ -1,0 +1,31 @@
+"""Cálculo monetário conforme specs/checkout_frete.md."""
+
+from decimal import Decimal, InvalidOperation
+
+FRETE_PADRAO = Decimal("15.00")  # REQ-01
+LIMITE_FRETE_GRATIS = Decimal("250.00")  # REQ-02
+
+
+def _validar_subtotal(subtotal):
+    """REQ-03: aceitar apenas valores positivos, finitos e em centavos."""
+    if isinstance(subtotal, bool) or not isinstance(subtotal, (int, float, str, Decimal)):
+        raise ValueError("Valor do carrinho inválido")
+    try:
+        valor = Decimal(str(subtotal))
+        if not valor.is_finite() or valor <= 0 or valor != valor.quantize(Decimal("0.01")):
+            raise ValueError("Valor do carrinho inválido")
+    except (InvalidOperation, ValueError):
+        raise ValueError("Valor do carrinho inválido") from None
+    return valor
+
+
+def calcular_frete(subtotal):
+    """REQ-01/REQ-02: retornar a taxa padrão ou a isenção inclusiva."""
+    valor = _validar_subtotal(subtotal)
+    return Decimal("0.00") if valor >= LIMITE_FRETE_GRATIS else FRETE_PADRAO
+
+
+def calcular_total(subtotal):
+    """REQ-01: somar a taxa aplicável ao subtotal validado."""
+    valor = _validar_subtotal(subtotal)
+    return valor + calcular_frete(valor)
